@@ -4,6 +4,8 @@ from sympy.core.sympify import SympifyError
 
 
 
+x, y = symbols('x y')  # Define globally so all functions can use
+
 #A function to simplify an arithmetic expression
 def simplify_eqn(expr):
 	try:
@@ -44,16 +46,43 @@ def differentiate(function):
         return None
         
         
+# Newton-Raphson method (1 iteration)
+def Raphson(function_eqn):
+    try:
+        n=1 #this represents the number of iterations
         
-def Raphson(function):
-	       print("Enter initial root: ")
-	       root=input()
+        root = float(input("Enter initial root: "))
+
+        function = sympify(function_eqn)
+       
+       #func_prime refers to the first derivative
+        func_prime = differentiate(function_eqn)       
+        if func_prime is None:
+            return
+        for i in range(1,4):
+            
+            f_val = function.subs(x, root)
+            f_prime_val = func_prime.subs(x, root)
+            if f_prime_val == 0:
+                print("Derivative is zero. Equation ended .\n")
+                return
+                # Newton-Raphson formula: x(n+1) = xn - f(xn)/f'(xn)
+            new_root_expr = x - function / func_prime
+            simplified = simplify_eqn(new_root_expr)
+            new_root = root - f_val / f_prime_val
+            print(f"➡️==> f({root}) = {f_val}")
+            print(f"➡️==> f'({root}) = {f_prime_val}")
+            print("="*60)
+            print(f"✅New root after {n} iteration: {new_root}\n")
+            print("="*60)
+            root=new_root
+            n+=1
+             #increament the iteration by 1
+
+    except Exception as e:
+        print("Error:", str(e))
 	       
-	       expr_diff= differentiate(function)
-	       result=simplify_eqn(x-function/expr_diff)
-	       print(result)
-	       
-	       
+	        
 #Function for operations to carry out
 def menu(option):
 	if option==1:
