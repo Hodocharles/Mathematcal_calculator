@@ -1,7 +1,9 @@
+import guidelines as gd
 import sympy as sp
 from sympy import symbols, simplify,sympify
 from sympy.core.sympify import SympifyError
-
+from rich import print
+from rich.align import Align
 
 
 x, y = symbols('x y')  # Define globally so all functions can use
@@ -9,16 +11,15 @@ x, y = symbols('x y')  # Define globally so all functions can use
 #A function to simplify an arithmetic expression
 def simplify_eqn(expr):
 	try:
-		# Define symbols.
-		x, y = symbols('x y')
+		
 		# Example: Define the expression you want to simplify
 		
 		
 		# Simplify the expression
 		simplified_expr = simplify(expr)
 		# Output result
-		print("Original Expression:", expr)
-		print(f"Simplified Expression:{ simplified_expr}\n")
+		print("\nOriginal Expression:", expr)
+		print(f"✅Simplified Expression:{ simplified_expr}\n")
 		return simplified_expr
 	
 	except (SympifyError, ValueError,Exception):
@@ -32,14 +33,14 @@ def differentiate(function):
     try:
 	 # Define the symbols also knom as  variable
 	       x = sp.symbols('x')
-	       # Input the function to differentiate
+	       
 	       
 	       # Convert the string to an expression
 	       f = sp.sympify(function)
 	       # Differentiate the function
 	       derivative = sp.diff(f, x)
 	       # Display the result of the derivative
-	       print(f"The derivative of {f} with respect to x is: {derivative}\n")
+	       print(f"✅The derivative of {f} with respect to x is: {derivative}\n")
 	       return derivative
     except (sp.SympifyError, Exception):
         print("Invalid function. Please check your syntax.\n")
@@ -73,20 +74,19 @@ def Raphson(function_eqn):
             print(f"➡️==> f({root}) = {f_val}")
             print(f"➡️==> f'({root}) = {f_prime_val}")
             print("="*60)
-            print(f"✅New root after {n} iteration: {new_root}\n")
+            print(f"✅NEW ROOT after {n} iteration: {new_root}\n")
             print("="*60)
             root=new_root
-            n+=1
-             #increament the iteration by 1
+            n+=1 #increament the iteration by 1
 
     except Exception as e:
-        print("Error:", str(e))
+        print("NRM Error:", str(e))
 	       
 	        
 #Function for operations to carry out
 def menu(option):
 	if option==1:
-		print("###")
+		gd.instructions()
 	elif option==2:
 			simplify_eqn(function)
 	elif option==3:
@@ -100,16 +100,22 @@ def menu(option):
 
 
 # a loop that keeps running in ordee to ask for the user's request'
+calc_title=Align.center("[bold magenta]=====WELCOME TO C-CALC====[/bold magenta]\n")
+print(calc_title)
 while True:
-			function = input("To quit the program, type exit\nEnter the function in terms of x : ")
+			print("To quit the program, type [bold red]exit[/bold red]\nEnter function in terms of x (2*x**3) : ", end=" ")
+			function = input()
 			if function.lower()=="exit":
-			     	print("goodbye")
+			     	print("[bold red]Thanks for Using our Calculator......[/bold red]")
 			     	break
 			#Menu
-			print("Please, select an option")
-			print("=====================")
+			print("Please, select an option (1-4)")
+			print("======================"*2)
 			print("1. Instructions and guidelines\n2. Perform Algebraic Simplification\n3. Perform Differentiation\n4. Perform NRM")
-			menu(int(input("SELECT: ")))
+			print("======================"*2)
+			
+			#To call on the menu function
+			menu(int(input("[SELECT]: ")))
 			
 
 
