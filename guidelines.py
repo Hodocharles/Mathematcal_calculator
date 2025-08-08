@@ -1,47 +1,144 @@
+import guidelines as gd
+import sympy as sp
+import limit
+from sympy import symbols, simplify,sympify
+from sympy.core.sympify import SympifyError
 from rich import print
 from rich.align import Align
 
 
-def instructions():
-    title=Align.center("[bold magenta]..........C-calculator..........\n Instructions and guidelines\n[/bold magenta]")
-    print(title)
-    
-    print("="*22)
-    func_msg="[bold magenta]Functions Expression: [/bold magenta]"
-    print(func_msg)
-    print("="*22)
-    
-    func_txt= " Using functions in this calculator requires you to type them in a specific manner otherwise, the results will be inaccurate or even develope a bug. \n Examples: to type in the function [bold red] x⁴+3x³-2x+1[/bold red]  into the calculator, you need to express it as [bold blue] x**4 +3*x**3-2*x+1[/bold blue] special functions like trigonometric and eular identities should be typed as [bold blue] log(x), cos(x), sin(x), sin(3*x**2), e**3, e**(4*x), sin(x)+4*x[/bold blue]. When expressing algrbraic functions, it is advised to use a bracket e.g [bold blue] (x+3)-(x+4)/(2*x) is not equal to ((x+3)-(x+4))/(2*x)\n[/bold blue]"
-    print(func_txt)
-    print("="*22)
-    Err_msg="[bold magenta]Error Messages🚨: [/bold magenta]"
-    print(Err_msg)
-    print("="*22)
-    Err_txt="[bold red]check your equation[/bold red]: Check the operators in the function (*,+,-,/)\n[bold red]Invalid function. Please check your syntax:[/bold red] Check the operators in the function (*,+,-, /) and how the function is expressed.\n[bold red]Derivative is zero. Equation ended:[/bold red] This is usually associated with the Newton Raphson Method (NRM). This signifies that the derivative of your function is 0 and as such the NRM can not be applied\n[bold red]NRM Error:[/bold red] The Newton Raphson Method calculation failed.\n"
-    print (Err_txt)
-    
-    
-    print("="*22)
-    Menu_msg="[bold magenta]Menu Selection: [/bold magenta]"
-    print(Menu_msg)
-    print("="*22)
-    Menu_txt="The select an option from the menu, use the numbers assigned to each option (e.g 1, 2,3)\n"
-    print(Menu_txt)
-    print("=="*60)
-    msg2=" [bold red]🚨 IMPORTANT/ACTION NEEDED!: [/bold red]: DO NOT ALTER ANY PART OF THIS PROGRAM WITHOUT APPROPRIATE PERMISSION. IN ORDER TO MAXIMIZE THE PERFORMANCE OF THIS PROGRAM, PLEASE INSTALL THE REQUIRED LIBRARIES FOLLOWING THE STEPS BELOW:\n In your terminal window, type the following to install the required library;\n[bold magenta]sympy[/bold magenta]: pip install sympy\n[bold magenta]rich[/bold magenta]: pip install rich\n"
-    print(msg2)
-    print("© Hodocharle 2025")
+x, y = symbols('x y')  # Define globally so all functions can use
+
+#A function to simplify an arithmetic expression
+def simplify_eqn(expr):
+	try:
+		
+		# Example: Define the expression you want to simplify
+		
+		
+		# Simplify the expression
+		simplified_expr = simplify(expr)
+		# Output result
+		print("\nOriginal Expression:", expr)
+		print(f"✅Simplified Expression:{ simplified_expr}\n")
+		return simplified_expr
+	
+	except (SympifyError, ValueError,Exception):
+		print("check your equation\n")
+		return None
+	
+
+		
+#function for the derivative
+def differentiate(function):
+    try:
+	 # Define the symbols also knom as  variable
+	       x = sp.symbols('x')
+	       
+	       
+	       # Convert the string to an expression
+	       f = sp.sympify(function)
+	       # Differentiate the function
+	       derivative = sp.diff(f, x)
+	       # Display the result of the derivative
+	       print(f"✅The derivative of {f} with respect to x is: {derivative}\n")
+	       return derivative
+    except (sp.SympifyError, Exception):
+        print("Invalid function. Please check your syntax.\n")
+        return None
+        
+        
+# Newton-Raphson method (1 iteration)
+def Raphson(function_eqn):
+    try:
+        n=1 #this represents the number of iterations
+        
+        root = float(input("Enter initial root: "))
+
+        function = sympify(function_eqn)
+       
+       #func_prime refers to the first derivative
+        func_prime = differentiate(function_eqn)       
+        if func_prime is None:
+            return
+        for i in range(1,4):
+            
+            f_val = function.subs(x, root)
+            f_prime_val = func_prime.subs(x, root)
+            if f_prime_val == 0:
+                print("Derivative is zero. Equation ended .\n")
+                return
+                # Newton-Raphson formula: x(n+1) = xn - f(xn)/f'(xn)
+            new_root_expr = x - function / func_prime
+            simplified = simplify_eqn(new_root_expr)
+            new_root = root - f_val / f_prime_val
+            print(f"➡️==> f({root}) = {f_val}")
+            print(f"➡️==> f'({root}) = {f_prime_val}")
+            print("="*60)
+            print(f"✅NEW ROOT after {n} iteration: {new_root}\n")
+            print("="*60)
+            root=new_root
+            n+=1 #increament the iteration by 1
+
+    except Exception as e:
+        print("NRM Error:", str(e))
+	       
+	        
+#Function for operations to carry out
+def menu(option):
+    if option == 1:
+        gd.instructions()
+    elif option == 2:
+        simplify_eqn(function)
+    elif option == 3:
+        differentiate(function)
+    elif option == 4:
+        Raphson(function)
+    elif option==5:
+        limit.func_limit(function)
+    else:
+        print("[bold red]Invalid option, enter a valid option 1-5[/bold red]")
+		
+				
+
+
+# a loop that keeps running in ordee to ask for the user's request'
+calc_title=Align.center("[bold magenta]=====WELCOME TO C-CALC====[/bold magenta]\n")
+print(calc_title)
+advise="[bold red]Please, read the imstructions before using this calculator in order to understand how to use it efficiently. To use the instruction manual, type any number and press enter, select option 1\n[/bold red]"
+print(advise)
+while True:
+			print("To quit the program, type [bold red]exit[/bold red]\nEnter function in terms of x (2*x**3) : ", end=" ")
+			function = input()
+			if function.strip().lower()=="exit":
+			     	print("[bold red]Thanks for Using our Calculator......[/bold red]")
+			     	break
+			#Menu
+			print("Please, select an option (1-4)")
+			print("======================"*2)
+			print("1. Instructions and guidelines\n2. Perform Algebraic Simplification\n3. Perform Differentiation\n4. Perform NRM\n5. Calculate limit")
+			print("======================"*2)
+			choice = input("[SELECT]: ").strip().lower()
+			if choice == "exit":
+			     print("[bold red]Thanks for using our Calculator![/bold red]")
+			     break
+			     
+			     # Validation — check if it's a number
+			     
+			if not choice.isdigit():
+			     print("[bold red]Invalid input! Please enter a number between 1 and 5, or 'exit' to quit.[/bold red]\n")
+			     continue
+			option = int(choice)
+			if not (1 <= option <= 5):
+			             print("[bold red]Invalid option! Please enter 1, 2, 3, 4 or 5.[/bold red]\n")
+			             continue
+			menu(option)
+		 	
 
 
 
 
-    
-    
-if __name__=="__main__":
-    print(" runs here only")
-    instructions()
-    
-    
+
 # ---------------------------------------------------------
 #  MyProgram™ v1.0
 #  Author: Hodo Charles
@@ -49,4 +146,3 @@ if __name__=="__main__":
 #  This software is protected under trademark law.
 #  Unauthorized copying or use is prohibited.
 # ---------------------------------------------------------
-
