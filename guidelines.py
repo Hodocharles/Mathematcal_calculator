@@ -30,6 +30,7 @@ def instructions():
     print("=="*60)
     msg2=" [bold red]🚨 IMPORTANT/ACTION NEEDED!: [/bold red]: DO NOT ALTER ANY PART OF THIS PROGRAM WITHOUT APPROPRIATE PERMISSION. IN ORDER TO MAXIMIZE THE PERFORMANCE OF THIS PROGRAM, PLEASE INSTALL THE REQUIRED LIBRARIES FOLLOWING THE STEPS BELOW:\n In your terminal window, type the following to install the required library;\n[bold magenta]sympy[/bold magenta]: pip install sympy\n[bold magenta]rich[/bold magenta]: pip install rich\n"
     print(msg2)
+    print("© Hodocharle 2025")
 
 
 
@@ -41,3 +42,11 @@ if __name__=="__main__":
     instructions()
     
     
+# ---------------------------------------------------------
+#  MyProgram™ v1.0
+#  Author: Hodo Charles
+#  © 2025 Hodo Charles. All rights reserved.
+#  This software is protected under trademark law.
+#  Unauthorized copying or use is prohibited.
+# ---------------------------------------------------------
+
