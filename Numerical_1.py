@@ -1,5 +1,6 @@
 import guidelines as gd
 import sympy as sp
+import limit
 from sympy import symbols, simplify,sympify
 from sympy.core.sympify import SympifyError
 from rich import print
@@ -93,8 +94,10 @@ def menu(option):
         differentiate(function)
     elif option == 4:
         Raphson(function)
+    elif option==5:
+        limit.func_limit(function)
     else:
-        print("[bold red]Invalid option, enter a valid option 1-4[/bold red]")
+        print("[bold red]Invalid option, enter a valid option 1-5[/bold red]")
 		
 				
 
@@ -102,6 +105,8 @@ def menu(option):
 # a loop that keeps running in ordee to ask for the user's request'
 calc_title=Align.center("[bold magenta]=====WELCOME TO C-CALC====[/bold magenta]\n")
 print(calc_title)
+advise="[bold red]Please, read the imstructions before using this calculator in order to understand how to use it efficiently. To use the instruction manual, type any number and press enter, select option 1\n[/bold red]"
+print(advise)
 while True:
 			print("To quit the program, type [bold red]exit[/bold red]\nEnter function in terms of x (2*x**3) : ", end=" ")
 			function = input()
@@ -111,7 +116,7 @@ while True:
 			#Menu
 			print("Please, select an option (1-4)")
 			print("======================"*2)
-			print("1. Instructions and guidelines\n2. Perform Algebraic Simplification\n3. Perform Differentiation\n4. Perform NRM")
+			print("1. Instructions and guidelines\n2. Perform Algebraic Simplification\n3. Perform Differentiation\n4. Perform NRM\n5. Calculate limit")
 			print("======================"*2)
 			choice = input("[SELECT]: ").strip().lower()
 			if choice == "exit":
@@ -121,16 +126,14 @@ while True:
 			     # Validation — check if it's a number
 			     
 			if not choice.isdigit():
-			     print("[bold red]Invalid input! Please enter a number between 1 and 4, or 'exit' to quit.[/bold red]\n")
+			     print("[bold red]Invalid input! Please enter a number between 1 and 5, or 'exit' to quit.[/bold red]\n")
 			     continue
 			option = int(choice)
-			if not (1 <= option <= 4):
-			             print("[bold red]Invalid option! Please enter 1, 2, 3, or 4.[/bold red]\n")
+			if not (1 <= option <= 5):
+			             print("[bold red]Invalid option! Please enter 1, 2, 3, 4 or 5.[/bold red]\n")
 			             continue
 			menu(option)
 		 	
-
-
 
 
 
