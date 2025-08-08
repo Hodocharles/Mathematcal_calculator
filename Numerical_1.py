@@ -85,18 +85,18 @@ def Raphson(function_eqn):
 	        
 #Function for operations to carry out
 def menu(option):
-	if option==1:
-		gd.instructions()
-	elif option==2:
-			simplify_eqn(function)
-	elif option==3:
-		differentiate(function)
-	elif option==4:
-		Raphson(function)
+    if option == 1:
+        gd.instructions()
+    elif option == 2:
+        simplify_eqn(function)
+    elif option == 3:
+        differentiate(function)
+    elif option == 4:
+        Raphson(function)
+    else:
+        print("[bold red]Invalid option, enter a valid option 1-4[/bold red]")
 		
 				
-
-
 
 
 # a loop that keeps running in ordee to ask for the user's request'
@@ -105,7 +105,7 @@ print(calc_title)
 while True:
 			print("To quit the program, type [bold red]exit[/bold red]\nEnter function in terms of x (2*x**3) : ", end=" ")
 			function = input()
-			if function.lower()=="exit":
+			if function.strip().lower()=="exit":
 			     	print("[bold red]Thanks for Using our Calculator......[/bold red]")
 			     	break
 			#Menu
@@ -113,17 +113,31 @@ while True:
 			print("======================"*2)
 			print("1. Instructions and guidelines\n2. Perform Algebraic Simplification\n3. Perform Differentiation\n4. Perform NRM")
 			print("======================"*2)
-			
-			#To call on the menu function
-			menu(int(input("[SELECT]: ")))
-			
+			choice = input("[SELECT]: ").strip().lower()
+			if choice == "exit":
+			     print("[bold red]Thanks for using our Calculator![/bold red]")
+			     break
+			     
+			     # Validation — check if it's a number
+			     
+			if not choice.isdigit():
+			     print("[bold red]Invalid input! Please enter a number between 1 and 4, or 'exit' to quit.[/bold red]\n")
+			     continue
+			option = int(choice)
+			if not (1 <= option <= 4):
+			             print("[bold red]Invalid option! Please enter 1, 2, 3, or 4.[/bold red]\n")
+			             continue
+			menu(option)
+		 	
 
 
 
 
 
-
-
-
-
-	       
+# ---------------------------------------------------------
+#  MyProgram™ v1.0
+#  Author: Hodo Charles
+#  © 2025 Hodo Charles. All rights reserved.
+#  This software is protected under trademark law.
+#  Unauthorized copying or use is prohibited.
+# ---------------------------------------------------------
