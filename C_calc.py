@@ -1,19 +1,16 @@
 """
 tk_calc_with_menus.py
-A Tkinter calculator GUI (SymPy-based) 
+A Tkinter calculator GUI (SymPy-based) with keypad and fraction button
 """
 
 import tkinter as tk
 from tkinter import messagebox, scrolledtext, filedialog, simpledialog
 import sympy as sp
-import sys
-
 
 # ---------- SymPy symbols ----------
 x, y = sp.symbols('x y')
 
 # ---------- COMPUTATION FUNCTIONS ----------
-# Replace or expand these with your actual implementations.
 def compute_simplify(expr_str: str) -> str:
     expr = sp.sympify(expr_str)
     return str(sp.simplify(expr))
@@ -43,7 +40,6 @@ def compute_newton_raphson(expr_str: str, init_guess, iterations=6) -> str:
     return str(sp.N(root, 12))
 
 def compute_solve(expr_str: str) -> str:
-    # Accepts "expr" meaning expr = 0, or "lhs = rhs"
     if '=' in expr_str:
         left, right = expr_str.split('=', 1)
         eq = sp.Eq(sp.sympify(left), sp.sympify(right))
@@ -58,14 +54,12 @@ def compute_limit(expr_str: str, point_str: str) -> str:
     pt = sp.sympify(point_str)
     return str(sp.limit(expr, x, pt))
 
-# --- End COMPUTATION FUNCTIONS ---
-
-# ---------- GUI helpers ----------
+# ---------- GUI ----------
 class CalculatorGUI:
     def __init__(self, master):
         self.master = master
         master.title("C-Calculator (with Menus)")
-        master.geometry("720x520")
+        master.geometry("800x720")
         self.theme = "dark"
         self._make_styles()
         self._build_widgets()
@@ -73,7 +67,6 @@ class CalculatorGUI:
         self._bind_shortcuts()
 
     def _make_styles(self):
-        # Theme colors
         self.colors = {
             "dark": {
                 "bg": "#1e1e2e",
@@ -81,6 +74,7 @@ class CalculatorGUI:
                 "entry_bg": "#2b2b3a",
                 "output_bg": "#282a36",
                 "button_bg": "#3a3f58",
+                "insert_bg": "#ff6600"  # orange cursor for better visibility
             },
             "light": {
                 "bg": "#f6f7fb",
@@ -88,72 +82,141 @@ class CalculatorGUI:
                 "entry_bg": "white",
                 "output_bg": "white",
                 "button_bg": "#e0e4f2",
+                "insert_bg": "#ff6600"
+            },
+            "mature": {  # More mature color theme
+                "bg": "#4b003f",
+                "fg": "#d98fd6",
+                "entry_bg": "#6e1e5b",
+                "output_bg": "#3f004d",
+                "button_bg": "#800080",
+                "insert_bg": "#ff66ff"
             }
-            
-
         }
-        
 
     def _apply_theme(self):
         c = self.colors[self.theme]
         self.master.config(bg=c["bg"])
         self.title_label.config(bg=c["bg"], fg=c["fg"])
         self.input_frame.config(bg=c["bg"])
-        self.output_area.config(bg=c["output_bg"], fg=c["fg"], insertbackground=c["fg"])
-        self.entry_expr.config(bg=c["entry_bg"], fg=c["fg"])
-        self.entry_init.config(bg=c["entry_bg"], fg=c["fg"])
+        self.output_area.config(bg=c["output_bg"], fg=c["fg"], insertbackground=c["insert_bg"])
+        self.entry_expr.config(bg=c["entry_bg"], fg=c["fg"], insertbackground=c["insert_bg"])
+        self.entry_init.config(bg=c["entry_bg"], fg=c["fg"], insertbackground=c["insert_bg"])
         for b in self.action_buttons:
-            b.config(bg=self.colors[self.theme]["button_bg"], fg=c["fg"])
+            b.config(bg=c["button_bg"], fg=c["fg"])
+        for btn in self.keypad_buttons:
+            btn.config(bg=c["button_bg"], fg=c["fg"])
 
     def _build_widgets(self):
         c = self.colors[self.theme]
-        # Title
         self.title_label = tk.Label(self.master, text="🧮 C-Calculator", font=("Helvetica", 20, "bold"),
                                     bg=c["bg"], fg=c["fg"])
         self.title_label.pack(pady=8)
 
-        # Input frame
         self.input_frame = tk.Frame(self.master, bg=c["bg"])
         self.input_frame.pack(padx=12, pady=6, fill="x")
 
-        tk.Label(self.input_frame, text="Expression (use 'x'):", bg=c["bg"], fg=c["fg"], font=("Arial", 10)).grid(row=0, column=0, sticky="w")
-        self.entry_expr = tk.Entry(self.input_frame, font=("Arial", 12), width=60)
-        self.entry_expr.grid(row=1, column=0, columnspan=4, sticky="w", pady=6)
+        tk.Label(self.input_frame, text="Expression (use 'x'):", bg=c["bg"], fg=c["fg"], font=("Arial", 7)).grid(row=0, column=0, sticky="w")
+        self.entry_expr = tk.Entry(self.input_frame, font=("Arial", 8), width=30, insertbackground=c["insert_bg"])
+        self.entry_expr.grid(row=1, column=0, columnspan=5, sticky="w", pady=6)
 
-        tk.Label(self.input_frame, text="Initial guess (Newton-Raphson):", bg=c["bg"], fg=c["fg"], font=("Arial", 11)).grid(row=2, column=0, sticky="w", pady=(8,0))
-        self.entry_init = tk.Entry(self.input_frame, width=15, font=("Arial", 12))
+        tk.Label(self.input_frame, text="Initial guess (Newton-Raphson):", bg=c["bg"], fg=c["fg"], font=("Arial", 7)).grid(row=2, column=0, sticky="w", pady=(8,0))
+        self.entry_init = tk.Entry(self.input_frame, width=15, font=("Arial", 8), insertbackground=c["insert_bg"])
         self.entry_init.grid(row=3, column=0, sticky="w", pady=4)
 
-        # Buttons
-        btn_frame = tk.Frame(self.master, bg=c["bg"])
-        btn_frame.pack(pady=10)
-        btn_config = {"font": ("Arial", 5, "bold"), "width": 8, "height": 2}
-        self.action_buttons = []
-        b1 = tk.Button(btn_frame, text="Simplify", command=self.on_simplify, **btn_config)
-        b2 = tk.Button(btn_frame, text="Differentiate", command=self.on_diff, **btn_config)
-        b3 = tk.Button(btn_frame, text="Integrate", command=self.on_integrate, **btn_config)
-        b4 = tk.Button(btn_frame, text="Factor", command=self.on_factor, **btn_config)
-        b5 = tk.Button(btn_frame, text="Newton-Raphson", command=self.on_newton, **btn_config)
-        b6 = tk.Button(btn_frame, text="Solve (eqn)", command=self.on_solve, **btn_config)
-        b7 = tk.Button(btn_frame, text="Limit", command=self.on_limit, **btn_config)
-        b8 = tk.Button(btn_frame, text="Clear Output", command=self.clear_output, **btn_config)
+        self.output_area = scrolledtext.ScrolledText(self.master, width=88, height=6, font=("Courier", 9),
+                                                     bg=c["output_bg"], fg=c["fg"], insertbackground=c["insert_bg"])
+        self.output_area.pack(padx=12, pady=8, fill="both", expand=False)
 
-        buttons = [b1,b2,b3,b4,b5,b6,b7,b8]
-        for i,btn in enumerate(buttons):
-            btn.grid(row=i//4, column=i%4, padx=6, pady=6)
+        func_btn_frame = tk.Frame(self.master, bg=c["bg"])
+        func_btn_frame.pack(pady=8)
+
+        btn_config = {"font": ("Arial", 5, "bold"), "width": 9, "height": 2}
+        self.action_buttons = []
+        b1 = tk.Button(func_btn_frame, text="Simplify", command=self.on_simplify, **btn_config)
+        b2 = tk.Button(func_btn_frame, text="Differentiate", command=self.on_diff, **btn_config)
+        b3 = tk.Button(func_btn_frame, text="Integrate", command=self.on_integrate, **btn_config)
+        b4 = tk.Button(func_btn_frame, text="Factor", command=self.on_factor, **btn_config)
+        b5 = tk.Button(func_btn_frame, text="Newton-Raphson", command=self.on_newton, **btn_config)
+        b6 = tk.Button(func_btn_frame, text="Solve (eqn)", command=self.on_solve, **btn_config)
+        b7 = tk.Button(func_btn_frame, text="Limit", command=self.on_limit, **btn_config)
+        b8 = tk.Button(func_btn_frame, text="Clear Output", command=self.clear_output, **btn_config)
+
+        func_buttons = [b1,b2,b3,b4,b5,b6,b7,b8]
+        for i,btn in enumerate(func_buttons):
+            btn.grid(row=i//4, column=i%4, padx=5, pady=5)
             self.action_buttons.append(btn)
 
-        # Output area
-        self.output_area = scrolledtext.ScrolledText(self.master, width=88, height=14, font=("Courier", 9))
-        self.output_area.pack(padx=12, pady=8, fill="both", expand=True)
+        keypad_frame = tk.Frame(self.master, bg=c["bg"])
+        keypad_frame.pack(pady=4)
 
-        # Apply theme colors
+        def add_to_entry(val):
+            widget = self.master.focus_get()
+            if widget == self.entry_init or widget == self.entry_expr:
+                widget.insert(tk.INSERT, val)
+            else:
+                self.entry_expr.insert(tk.INSERT, val)
+
+        def delete_one_char():
+            widget = self.master.focus_get()
+            if widget == self.entry_init or widget == self.entry_expr:
+                current = widget.get()
+                if current:
+                    # Delete last character
+                    widget.delete(len(current)-1, tk.END)
+
+        def insert_fraction():
+            widget = self.master.focus_get()
+            if widget == self.entry_init or widget == self.entry_expr:
+                pos = widget.index(tk.INSERT)
+                widget.insert(pos, "(()/())")
+                widget.icursor(pos + 1)
+
+        def clear_all():
+            self.entry_expr.delete(0, tk.END)
+            self.entry_init.delete(0, tk.END)
+            self.clear_output()
+
+        btns = [
+            ["1", "2", "3", "(", ")"],
+            ["4", "5", "6", "+", "-"],
+            ["7", "8", "9", "*", "/"],
+            ["Fraction", "0", ".", "^", "Clear"],
+            ["√", "sin(", "cos(", "tan(", "π"],
+            ["sec(", "cosec(", "x", "ln(", "e"]
+        ]
+
+        self.keypad_buttons = []
+        for r, row in enumerate(btns):
+            for c_, val in enumerate(row):
+                if val == "Clear":
+                    action = delete_one_char  # Changed here to delete one char at a time
+                elif val == "Fraction":
+                    action = insert_fraction
+                elif val == "π":
+                    action = lambda v="pi": add_to_entry(v)
+                elif val == "√":
+                    action = lambda v="sqrt(": add_to_entry(v)
+                elif val in ["sin(", "cos(", "tan(", "sec(", "cosec(", "ln("]:
+                    action = lambda v=val: add_to_entry(v)
+                elif val == "e":
+                    action = lambda v="E": add_to_entry(v)
+                elif val == "x":
+                    action = lambda v="x": add_to_entry(v)
+                else:
+                    action = lambda v=val: add_to_entry(v)
+                btn = tk.Button(keypad_frame, text=val, width=4, height=2, command=action,
+                                bg=c["button_bg"], fg=c["fg"], font=("Arial", 8, "bold"))
+                btn.grid(row=r, column=c_, padx=2, pady=2)
+                self.keypad_buttons.append(btn)
+
         self._apply_theme()
+
+        # Disable Android on-screen keyboard popup by forcing focus
+        self.entry_expr.focus_force()
 
     def _build_menus(self):
         menubar = tk.Menu(self.master)
-
-        # File menu
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Open Expression...", accelerator="Ctrl+O", command=self.open_expression_from_file)
         file_menu.add_command(label="Save Output...", accelerator="Ctrl+S", command=self.save_output_to_file)
@@ -161,14 +224,12 @@ class CalculatorGUI:
         file_menu.add_command(label="Exit", accelerator="Ctrl+Q", command=self.master.quit)
         menubar.add_cascade(label="File", menu=file_menu)
 
-        # Edit menu
         edit_menu = tk.Menu(menubar, tearoff=0)
         edit_menu.add_command(label="Copy Output", accelerator="Ctrl+C", command=self.copy_output)
         edit_menu.add_command(label="Paste to Expression", accelerator="Ctrl+V", command=self.paste_to_expression)
         edit_menu.add_command(label="Clear Output", accelerator="Ctrl+L", command=self.clear_output)
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
-        # Tools menu (same operations as buttons)
         tools_menu = tk.Menu(menubar, tearoff=0)
         tools_menu.add_command(label="Simplify", command=self.on_simplify)
         tools_menu.add_command(label="Differentiate", command=self.on_diff)
@@ -179,12 +240,10 @@ class CalculatorGUI:
         tools_menu.add_command(label="Limit", command=self.on_limit)
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
-        # View menu
         view_menu = tk.Menu(menubar, tearoff=0)
         view_menu.add_command(label="Toggle Theme", command=self.toggle_theme, accelerator="Ctrl+T")
         menubar.add_cascade(label="View", menu=view_menu)
 
-        # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
         help_menu.add_command(label="About", command=self.show_about)
         help_menu.add_command(label="Docs / How to use", command=self.show_help)
@@ -201,14 +260,13 @@ class CalculatorGUI:
         self.master.bind_all("<Control-l>", lambda e: self.clear_output())
         self.master.bind_all("<Control-t>", lambda e: self.toggle_theme())
 
-    # ---------- Menu / button callbacks ----------
+    # ---------- Action methods ----------
     def _get_expr(self) -> str:
         return self.entry_expr.get().strip()
 
     def _get_init(self):
         ig = self.entry_init.get().strip()
         if ig == "":
-            # ask user for a value
             ig = simpledialog.askstring("Initial guess", "Enter initial guess for Newton-Raphson:", parent=self.master)
             if ig is None:
                 raise ValueError("No initial guess provided.")
@@ -295,7 +353,7 @@ class CalculatorGUI:
         except Exception as e:
             messagebox.showerror("Error (limit)", str(e))
 
-    # ---------- File / Edit menu actions ----------
+    # ---------- Utility ----------
     def open_expression_from_file(self):
         fn = filedialog.askopenfilename(title="Open expression file", filetypes=[("Text files","*.txt"),("All files","*.*")])
         if not fn:
@@ -303,7 +361,6 @@ class CalculatorGUI:
         try:
             with open(fn, 'r', encoding='utf-8') as f:
                 txt = f.read().strip()
-            # Put into expression field
             self.entry_expr.delete(0, tk.END)
             self.entry_expr.insert(0, txt)
             self._append_output(f"[Loaded expression from {fn}]\n")
@@ -341,26 +398,34 @@ class CalculatorGUI:
     def clear_output(self):
         self.output_area.delete("1.0", tk.END)
 
-    # ---------- Utility ----------
     def _append_output(self, text: str):
         self.output_area.insert(tk.END, text + "\n")
         self.output_area.see(tk.END)
 
     def toggle_theme(self):
-        self.theme = "light" if self.theme == "dark" else "dark"
+        # Cycle themes: dark -> light -> mature ->        
+        if self.theme == "dark":
+            self.theme = "light"
+        elif self.theme == "light":
+            self.theme = "mature"
+        else:
+            self.theme = "dark"
         self._apply_theme()
 
     def show_about(self):
-        messagebox.showinfo("About", "C-Calculator\nTkinter + SymPy\nMenu-enabled GUI\nMyProgram™ v1.0.\n(©Hodo Charles 2025.)\nUnauthorized copying or use is prohibited\n Dedicated to AFIT(Mathematics Dept)\nand C-learn Team")
+        messagebox.showinfo("About", "C-Calculator\nTkinter + SymPy\nKeypad-enabled GUI\n(©Hodo Charles 2025)\nDedicated to AFIT(Mathematics Dept) \n & C-learn Team")
 
     def show_help(self):
         help_text = (
             "How to use:\n"
-            "• Type an expression using 'x',\n e.g. x**2 + 5*x - 3\n trig identities should be expressed as \n sin(x), cos(x), tan(2*x), sec(x)....\n"
-            "• Use Tools menu or buttons\n to run operations.\n"
-            "• For Newton-Raphson Method, \nset initial guess in the field \nor you'll be prompted.\n"
-            "• You can toggle theme with\n View → Toggle Theme or Ctrl+T.\n"
-            "• Paste your functions into the\n COMPUTATION FUNCTIONS \nsection in the script.\n • Expression is the same\n as equation\n •The solve(eqn) function\n provides the roots of that satisfies\n that expression\n"
+            "• Type or click buttons to enter expression(equation).\n"
+            "• Use 'x' for variable, sqrt() for roots.\n"
+            "•example of expression is\n x**3-3*x-6 which is the same as \n x^3-3*x-6\n"
+            "• trig functions should have \na closing bracket cos(x)\n"
+               "• Use oo (small leter o)\nfor infinity in limits.\n"
+            "• Click Tools button or menu for operations.\n"
+            "• Newton-Raphson requires initial guess.\n"
+            "• Toggle theme with Ctrl+T."
         )
         messagebox.showinfo("Docs / How to use", help_text)
 
@@ -372,3 +437,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+        
+# ---------------------------------------------------------
+#  MyProgram™ v1.0
+#  Author: Hodo Charles
+#  © 2025 Hodo Charles. All rights reserved.
+#  This software is protected under trademark law.
+#  Unauthorized copying or use is prohibited.
+# ---------------------------------------------------------
+
